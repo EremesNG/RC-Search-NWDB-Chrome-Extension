@@ -3,13 +3,14 @@
   "name": "Right-Click Search New World DB",
   "description": "Quickly search for item info on nwdb.info via right-click",
   "background": {
-    "service_worker": "main.js"
+    "service_worker": "background.js"
   },
   "icons": {
     "16": "nwdbinfo.png",
     "48": "nwdbinfo.png"
   },
-  "permissions": ["contextMenus", "tabs"],
+  "permissions": ["contextMenus", "tabs", "scripting"],
+  "host_permissions": ["http://*/*", "https://*/*"],
   "update_url": "https://clients2.google.com/service/update2/crx",
-  "version": "1.1"
+  "version": "1.2"
 }
