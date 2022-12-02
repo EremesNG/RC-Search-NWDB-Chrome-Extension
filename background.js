@@ -23,7 +23,14 @@ function selectionHandler(info, tab) {
 			res.json().then(data => {
 				doSearch(data.url, tab);
 			})
-		} else {
+		}
+		if(res.status == 404){
+			chrome.scripting.executeScript({
+				target: { tabId: tab.id },
+				files: ['/alertify/alertify.min.js', '/alerts/alertNotFound.js']
+			});
+		}
+		else {
 			chrome.scripting.executeScript({
 				target: { tabId: tab.id },
 				files: ['/alertify/alertify.min.js', '/alerts/alertError.js']
