@@ -3,10 +3,7 @@ var cssAlertifyTheme = "";
 var tabId;
 
 function doSearch(urlItem, tab) {
-	chrome.scripting.executeScript({
-		target: { tabId: tab.id },
-		files: ['/alertify/alertify.min.js', '/alerts/alertOk.js']
-	});
+	exeScript(tab.id, ['/alertify/alertify.min.js', '/alerts/alertOk.js']);
 
 	chrome.tabs.create({
 		url: urlItem,
@@ -17,24 +14,20 @@ function doSearch(urlItem, tab) {
 
 function selectionHandler(info, tab) {
 	console.log(info);
-	fetch('https://erc-search-nwdbinfo.onrender.com/' + info.selectionText).then(res => {
+	exeScript(tab.id, ['/alertify/alertify.min.js', '/alerts/alertStart.js']);
+	
+	fetch('https://api.catrinagames.com/NW/rc/' + info.selectionText).then(res => {
 		console.log(res);
 		if (res.status == 200) {
 			res.json().then(data => {
 				doSearch(data.url, tab);
 			})
 		}
-		if(res.status == 404){
-			chrome.scripting.executeScript({
-				target: { tabId: tab.id },
-				files: ['/alertify/alertify.min.js', '/alerts/alertNotFound.js']
-			});
+		else if (res.status == 404) {
+			exeScript(tab.id, ['/alertify/alertify.min.js', '/alerts/alertNotFound.js']);
 		}
 		else {
-			chrome.scripting.executeScript({
-				target: { tabId: tab.id },
-				files: ['/alertify/alertify.min.js', '/alerts/alertError.js']
-			});
+			exeScript(tab.id, ['/alertify/alertify.min.js', '/alerts/alertError.js']);
 		}
 	}).catch(err => {
 		console.log(err);
@@ -70,12 +63,6 @@ async function resetContextMenus() {
 		if (info.menuItemId == "rcSearch") {
 
 			insertCSS(tab.id);
-
-			chrome.scripting.executeScript({
-				target: { tabId: tab.id },
-				files: ['/alertify/alertify.min.js', '/alerts/alertStart.js']
-			});
-
 			selectionHandler(info, tab);
 		}
 	});
@@ -98,6 +85,13 @@ function insertCSS(tabIndex) {
 	chrome.scripting.insertCSS({
 		target: { tabId: tabIndex },
 		css: cssAlertifyTheme
+	});
+}
+
+function exeScript(tabid, arrayScripts) {
+	chrome.scripting.executeScript({
+		target: { tabId: tabid },
+		files: arrayScripts
 	});
 }
 
