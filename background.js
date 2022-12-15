@@ -1,5 +1,5 @@
-var cssAlertify = "";
-var cssAlertifyTheme = "";
+var cssAlertify = null;
+var cssAlertifyTheme = null;
 var tabId;
 
 function doSearch(urlItem, tab) {
@@ -13,11 +13,11 @@ function doSearch(urlItem, tab) {
 }
 
 function selectionHandler(info, tab) {
-	console.log(info);
+	//console.log(info);
 	exeScript(tab.id, ['/alertify/alertify.min.js', '/alerts/alertStart.js']);
 	
 	fetch('https://api.catrinagames.com/NW/rc/' + info.selectionText).then(res => {
-		console.log(res);
+		//console.log(res);
 		if (res.status == 200) {
 			res.json().then(data => {
 				doSearch(data.url, tab);
@@ -35,17 +35,26 @@ function selectionHandler(info, tab) {
 }
 
 async function resetContextMenus() {
-	fetch("/alertify/alertify.min.css", { headers: { 'Content-Type': 'text/plain' } }).then(data => {
-		data.text().then(jData => {
-			cssAlertify = jData;
-		})
-	});
-	fetch("/alertify/default.min.css", { headers: { 'Content-Type': 'text/plain' } }).then(data => {
-		data.text().then(jData => {
-			cssAlertifyTheme = jData;
-		})
-	});
+	if(cssAlertify == null || cssAlertifyTheme == null){
+		fetch("/alertify/alertify.min.css", { headers: { 'Content-Type': 'text/plain' } }).then(data => {
+			data.text().then(jData => {
+				cssAlertify = jData;
 
+				fetch("/alertify/default.min.css", { headers: { 'Content-Type': 'text/plain' } }).then(data => {
+					data.text().then(jData => {
+						cssAlertifyTheme = jData;
+
+						contextMenuInit();
+					})
+				});
+			})
+		});
+	}else{
+		contextMenuInit();
+	}
+}
+
+function contextMenuInit(){
 	chrome.contextMenus.removeAll(
 		function () {
 			chrome.contextMenus.create({
@@ -57,34 +66,26 @@ async function resetContextMenus() {
 	);
 
 	chrome.contextMenus.onClicked.addListener(function (info, tab) {
-		console.log(info);
+		//console.log(info);
 		tabId = tab.id;
 
 		if (info.menuItemId == "rcSearch") {
 
-			insertCSS(tab.id);
+			insertCSS(tab.id, cssAlertify);
+			insertCSS(tab.id, cssAlertifyTheme);
 			selectionHandler(info, tab);
 		}
 	});
 }
 
-function insertCSS(tabIndex) {
+function insertCSS(tabIndex, css) {
 	chrome.scripting.removeCSS({
 		target: { tabId: tabIndex },
-		css: cssAlertify
-	});
-	chrome.scripting.removeCSS({
-		target: { tabId: tabIndex },
-		css: cssAlertifyTheme
-	});
-
-	chrome.scripting.insertCSS({
-		target: { tabId: tabIndex },
-		css: cssAlertify
+		css: css
 	});
 	chrome.scripting.insertCSS({
 		target: { tabId: tabIndex },
-		css: cssAlertifyTheme
+		css: css
 	});
 }
 

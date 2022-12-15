@@ -1,2 +1,2 @@
 alertify.set('notifier','position', 'bottom-center');
-alertify.success('Item found, displaying it...');
+alertify.success('Item found');
