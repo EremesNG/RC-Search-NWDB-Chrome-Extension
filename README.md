@@ -4,3 +4,7 @@
 Chrome: https://chrome.google.com/webstore/detail/right-click-search-new-wo/hakmccebdlbpokloiibhbkccapaggbop
 
 Edge: In Review
+
+#
+
+![Extension Image](https://i.imgur.com/J64xVNX.png)
