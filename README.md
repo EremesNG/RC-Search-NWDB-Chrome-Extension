@@ -3,7 +3,7 @@
 
 Chrome: https://chrome.google.com/webstore/detail/right-click-search-new-wo/hakmccebdlbpokloiibhbkccapaggbop
 
-Edge: In Review
+Edge: https://microsoftedge.microsoft.com/addons/detail/lcnpkmedcddeefmdnldjmbklncegnjpe
 
 #
 
