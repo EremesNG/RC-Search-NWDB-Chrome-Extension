@@ -55,6 +55,21 @@ async function resetContextMenus() {
 }
 
 function contextMenuInit(){
+
+	//Alarm to always active
+	chrome.alarms.clearAll(
+		function () {
+			chrome.alarms.create("rcSearchWakeUp", {
+				delayInMinutes: 0,
+				periodInMinutes: 0.5
+			})
+		}
+	);
+
+	chrome.alarms.onAlarm.addListener(function (alarm) {
+		console.info("Right-Click Search New World DB working...");
+	})
+
 	chrome.contextMenus.removeAll(
 		function () {
 			chrome.contextMenus.create({
@@ -83,6 +98,7 @@ function insertCSS(tabIndex, css) {
 		target: { tabId: tabIndex },
 		css: css
 	});
+	
 	chrome.scripting.insertCSS({
 		target: { tabId: tabIndex },
 		css: css
