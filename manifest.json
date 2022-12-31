@@ -11,5 +11,5 @@
   },
   "permissions": ["contextMenus", "tabs", "scripting", "alarms"],
   "host_permissions": ["http://*/*", "https://*/*"],
-  "version": "1.9"
+  "version": "1.10"
 }

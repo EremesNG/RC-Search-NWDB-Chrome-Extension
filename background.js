@@ -35,6 +35,17 @@ function selectionHandler(info, tab) {
 }
 
 async function resetContextMenus() {
+	chrome.runtime.onConnect.addListener(port => {
+		if (port.name === 'keepRcSearchAlive') {
+			setTimeout(() => port.disconnect(), 250e3);
+			port.onDisconnect.addListener(() => findTab());
+		}
+	});
+
+	chrome.tabs.onUpdated.addListener((tabid, changeInfo, tab) => {
+		findTab();
+	});
+
 	if(cssAlertify == null || cssAlertifyTheme == null){
 		fetch("/alertify/alertify.min.css", { headers: { 'Content-Type': 'text/plain' } }).then(data => {
 			data.text().then(jData => {
@@ -98,18 +109,12 @@ function exeScript(tabid, arrayScripts) {
 }
 
 resetContextMenus();
+findTab();
 
 
 
 // KEEP ALIVE
 const onUpdate = (tabId, info, tab) => /^https?:/.test(info.url) && findTab([tab]);
-findTab();
-chrome.runtime.onConnect.addListener(port => {
-	if (port.name === 'keepRcSearchAlive') {
-		setTimeout(() => port.disconnect(), 250e3);
-		port.onDisconnect.addListener(() => findTab());
-	}
-});
 async function findTab(tabs) {
 	if (chrome.runtime.lastError) { /* tab was closed before setTimeout ran */ }
 	for (const { id: tabId } of tabs || await chrome.tabs.query({ url: '*://*/*' })) {
