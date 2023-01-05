@@ -11,7 +11,7 @@
 .alertify .ajs-dialog {
     max-width: 600px;
     min-height: 122px;
-    background-color: #fff;
+    background-color: #202020;
     border: 1px solid rgba(0, 0, 0, .2);
     -webkit-box-shadow: 0 5px 15px rgba(0, 0, 0, .5);
     box-shadow: 0 5px 15px rgba(0, 0, 0, .5);
@@ -19,26 +19,29 @@
 }
 
 .alertify .ajs-header {
-    color: #333;
+    color: #fff;
     border-bottom: 1px solid #e5e5e5;
     border-radius: 6px 6px 0 0;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 18px
+    font-size: 18px;
+    background-color: #202020;
 }
 
 .alertify .ajs-body {
     font-family: Roboto, sans-serif;
-    color: #000
+    background-color: #202020;
+    color: #fff;
 }
 
 .alertify.ajs-maximized:not(.ajs-resizable) .ajs-content,
 .alertify.ajs-resizable .ajs-content {
     top: 58px;
-    bottom: 68px
+    bottom: 68px;
 }
 
 .alertify .ajs-footer {
-    background-color: #fff;
+    background-color: #202020;
+    color: #fff;
     padding: 15px;
     border-top: 1px solid #e5e5e5;
     border-radius: 0 0 6px 6px

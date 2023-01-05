@@ -2,14 +2,25 @@
   "manifest_version": 3,
   "name": "Right-Click Search New World DB",
   "description": "Quickly search for item info on nwdb.info via right-click",
+  "action": {
+    "default_popup": "/popup/index.html"
+  },
   "background": {
     "service_worker": "background.js"
   },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "exclude_matches": ["*://*.new-world.guide/*", "*://*.nwdb.info/*"],
+      "css": ["/popup/css/bootstrap-iso.min.css", "/alertify/alertify.min.css", "/alertify/default.min.css", "/popup/css/rcNWSearch.css"],
+      "js": ["/alertify/alertify.min.js", "/popup/js/nwdbembed.js"]
+    }
+  ],
   "icons": {
     "16": "nwdbinfo.png",
     "48": "nwdbinfo.png"
   },
-  "permissions": ["contextMenus", "tabs", "scripting", "alarms"],
+  "permissions": ["contextMenus", "tabs", "scripting", "alarms", "storage"],
   "host_permissions": ["http://*/*", "https://*/*"],
-  "version": "1.10"
+  "version": "1.20"
 }

@@ -1,0 +1,9 @@
+html, body{
+    background-color: #202020;
+    padding: 20px;
+    color: white;
+}
+
+.showresultsform label{
+    width: 120px;
+}
