@@ -9,7 +9,7 @@ async function doSearch(itemsData, tab) {
 	});
 
 	let settings = {};
-	const data = await chrome.storage.sync.get("settings");
+	let data = await chrome.storage.sync.get("settings");
 	Object.assign(settings, data.settings);
 	if(Boolean(settings.showresults)){
 		chrome.storage.local.set({itemsData});
@@ -34,7 +34,7 @@ async function doSearch(itemsData, tab) {
 
 						let itemImgDiv = document.createElement('div');
 						itemImgDiv.className = "align-self-start mr-3 rcsearchItemImg";
-						itemImgDiv.innerHTML = `<img src="${item.icon ? item.icon : "https://cdn.nwdb.info/static/images/brand/logo_transparent_48.png"}" width="64" height="64" alt="${item.name}">`;
+						itemImgDiv.innerHTML = `<img src="${item.icon ? item.icon : "https://nwdb.info/images/db/soon.png"}" width="64" height="64" alt="${item.name}">`;
 
 						itemLi.appendChild(itemImgDiv);
 
@@ -93,13 +93,23 @@ async function doSearch(itemsData, tab) {
 	}
 }
 
-function selectionHandler(info, tab) {
+async function selectionHandler(info, tab) {
 	chrome.scripting.executeScript({
 		target: { tabId: tabId },
 		func: () => { alertify.set('notifier', 'position', 'bottom-center'); alertify.notify('Searching...'); }
 	});
+
+	let sourcedbUri = "https://api.catrinagames.com/NW/searchguide/";
+	let settings = {};
+	let data = await chrome.storage.sync.get("settings");
+	Object.assign(settings, data.settings);
+	if (settings.sourcedb == "NWGUIDE"){
+		sourcedbUri = "https://api.catrinagames.com/NW/searchguide/";
+	}else{
+		sourcedbUri = "https://api.catrinagames.com/NW/search/"
+	}
 	
-	fetch('https://api.catrinagames.com/NW/searchguide/' + info.selectionText).then(res => {
+	fetch(sourcedbUri + info.selectionText).then(res => {
 		//console.log(res);
 		if (res.status == 200) {
 			res.json().then(data => {
