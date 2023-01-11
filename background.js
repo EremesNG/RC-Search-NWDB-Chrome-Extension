@@ -1,113 +1,132 @@
+/* 
+* ███████╗██████╗ ███████╗███╗   ███╗███████╗███████╗███╗   ██╗ ██████╗ 
+* ██╔════╝██╔══██╗██╔════╝████╗ ████║██╔════╝██╔════╝████╗  ██║██╔════╝ 
+* █████╗  ██████╔╝█████╗  ██╔████╔██║█████╗  ███████╗██╔██╗ ██║██║  ███╗
+* ██╔══╝  ██╔══██╗██╔══╝  ██║╚██╔╝██║██╔══╝  ╚════██║██║╚██╗██║██║   ██║
+* ███████╗██║  ██║███████╗██║ ╚═╝ ██║███████╗███████║██║ ╚████║╚██████╔╝
+* ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝ ╚═════╝                                                                 
+*/
+
 var cssAlertify = null;
 var cssAlertifyTheme = null;
-var tabId;
 
 async function doSearch(itemsData, tab) {
+	chrome.storage.local.set({ itemsData });
+	
 	chrome.scripting.executeScript({
-		target: { tabId: tabId },
-		func: () => { alertify.set('notifier', 'position', 'bottom-center'); alertify.success('Item found'); }
-	});
-
-	let settings = {};
-	let data = await chrome.storage.sync.get("settings");
-	Object.assign(settings, data.settings);
-	if(Boolean(settings.showresults)){
-		chrome.storage.local.set({itemsData});
-
+		target: { tabId: tab.id },
+		files: ['./alertify/alertify.min.js'],
+		injectImmediately: true
+	}, () => {
 		chrome.scripting.executeScript({
-			target: { tabId: tabId },
+			target: { tabId: tab.id },
 			func: () => {
-				chrome.storage.local.get("itemsData").then((res) => {
-					let resultsDiv = document.createElement('div');
-					resultsDiv.className = "bootstrap-iso rcsearchResults";
+				alertify.showRcResults || alertify.dialog('showRcResults', function () {
+					var iframe;
+					return {
+						main: function (uriResults) {
+							return this.set({
+								'uriResults': uriResults
+							});
+						},
+						// we only want to override two options (padding and overflow).
+						setup: function () {
+							return {
+								options: {
+									//disable both padding and overflow control.
+									padding: !1,
+									overflow: !1,
+								}
+							};
+						},
+						build: function () {
+							// create the iframe element
+							iframe = document.createElement('iframe');
+							iframe.frameBorder = "no";
+							iframe.width = "100%";
+							iframe.height = "100%";
+							// add it to the dialog
+							this.elements.content.appendChild(iframe);
 
-					var itemsUl = document.createElement('ul');
-					itemsUl.className = "list-unstyled";
-
-					for (const item of res.itemsData) {
-						let itemLi = document.createElement('li');
-						itemLi.className = "media d-flex align-items-center rcsearchItemLi";
-
-						let itemA = document.createElement('a');
-						itemA.href = item.url;
-						itemA.target = "_blank";
-
-						let itemImgDiv = document.createElement('div');
-						itemImgDiv.className = "align-self-start mr-3 rcsearchItemImg";
-						itemImgDiv.innerHTML = `<img src="${item.icon ? item.icon : "https://nwdb.info/images/db/soon.png"}" width="64" height="64" alt="${item.name}">`;
-
-						itemLi.appendChild(itemImgDiv);
-
-						let itemBody = document.createElement('div');
-						itemBody.className = "media-body";
-
-						let itemName = document.createElement('h6');
-						itemName.className = "mt-0 rcsearchItemName";
-						itemName.textContent = item.name;
-
-						itemBody.appendChild(itemName);
-
-						for (const tag of item.tags) {
-							let itemTag = document.createElement('span');
-							itemTag.className = "badge badge-primary badge-pill rcsearchItemTag";
-							itemTag.textContent = tag;
-							itemBody.appendChild(itemTag);
+							//give the dialog initial height (half the screen height).
+							this.elements.body.style.minHeight = screen.height * .5 + 'px';
+						},
+						// dialog custom settings
+						settings: {
+							uriResults: undefined
+						},
+						// listen and respond to changes in dialog settings.
+						settingUpdated: function (key, oldValue, newValue) {
+							switch (key) {
+								case 'uriResults':
+									iframe.src = newValue;
+									break;
+							}
+						},
+						// listen to internal dialog events.
+						hooks: {
+							// triggered when a dialog option gets update.
+							// warning! this will not be triggered for settings updates.
+							onupdate: function (option, oldValue, newValue) {
+								switch (option) {
+									case 'resizable':
+										if (newValue) {
+											this.elements.content.removeAttribute('style');
+											iframe && iframe.removeAttribute('style');
+										} else {
+											this.elements.content.style.minHeight = 'inherit';
+											iframe && (iframe.style.minHeight = 'inherit');
+										}
+										break;
+								}
+							}
 						}
-
-						let itemTypeTag = document.createElement('span');
-						itemTypeTag.className = "badge badge-primary badge-pill rcsearchItemTag";
-						itemTypeTag.textContent = item.type.charAt(0).toUpperCase() + item.type.slice(1);
-						itemBody.appendChild(itemTypeTag);
-
-						itemLi.appendChild(itemBody);
-						itemA.appendChild(itemLi);
-						itemsUl.appendChild(itemA);
-					}
-
-					resultsDiv.appendChild(itemsUl);
-
-					var pre = document.createElement('pre');
-					//custom style.
-					pre.style.maxHeight = "400px";
-					pre.style.margin = "0";
-					pre.style.padding = "24px";
-					pre.style.whiteSpace = "pre-wrap";
-					pre.style.textAlign = "justify";
-					pre.appendChild(resultsDiv);
-
-
-					//show as confirm
-					alertify.alert("Results", pre, function () {
-					}).settings({'label': ''});
-					/* alertify.confirm('Confirm Title', 'Confirm Message', function () { alertify.success('Ok') }
-						, function () { alertify.error('Cancel') }); */
+					};
 				});
+				//show the dialog
+				alertify.showRcResults().set({ frameless: true, 'startMaximized': true });
+				alertify.showRcResults(chrome.runtime.getURL("/results/index.html")).set({ onclose: () => { chrome.runtime.sendMessage("rcSearchPopClosed"); document.querySelectorAll(".alertify").forEach(el => el.remove()); }});
 			}
 		});
-	}else{
-		chrome.tabs.create({
-			url: itemsData[0].url,
-			selected: true,
-			index: tab.index + 1
-		});
-	}
-}
-
-async function selectionHandler(info, tab) {
-	chrome.scripting.executeScript({
-		target: { tabId: tabId },
-		func: () => { alertify.set('notifier', 'position', 'bottom-center'); alertify.notify('Searching...'); }
 	});
 
-	let sourcedbUri = "https://api.catrinagames.com/NW/searchguide/";
-	let settings = {};
-	let data = await chrome.storage.sync.get("settings");
-	Object.assign(settings, data.settings);
-	if (settings.sourcedb == "NWGUIDE"){
-		sourcedbUri = "https://api.catrinagames.com/NW/searchguide/";
-	}else{
-		sourcedbUri = "https://api.catrinagames.com/NW/search/"
-	}
+}
+
+async function rcSearchHandler(info, tab) {
+	let sourcedbUri = "https://api.catrinagames.com/NW/searchdb/"
+	insertCSS(tab.id, ["/alertify/alertify.min.css", "/alertify/default.min.css", "/popup/css/rcNWSearch.css"]);
+
+	fetch(sourcedbUri + info.selectionText).then(res => {
+		//console.log(res);
+		if (res.status == 200) {
+			res.json().then(data => {
+				doSearch(data, tab);
+			});
+		}
+		else if (res.status == 404) {
+		}
+		else {
+			chrome.scripting.executeScript({
+				target: { tabId: tab.id },
+				files: ['./alertify/alertify.min.js'],
+				injectImmediately: true
+			}, () => {
+				chrome.scripting.executeScript({
+					target: { tabId: tab.id },
+					func: () => {
+						alertify.set('notifier', 'position', 'bottom-center'); alertify.error('Search failed, please try later...');
+					}
+				});
+			}
+			);
+		}
+	}).catch(err => {
+		console.log(err);
+	})
+}
+
+/* async function rcSearchNWINFOHandler(info, tab) {
+	let sourcedbUri = "https://api.catrinagames.com/NW/search/"
 	
 	fetch(sourcedbUri + info.selectionText).then(res => {
 		//console.log(res);
@@ -117,21 +136,32 @@ async function selectionHandler(info, tab) {
 			})
 		}
 		else if (res.status == 404) {
-			chrome.scripting.executeScript({
-				target: { tabId: tabId },
-				func: () => { alertify.set('notifier', 'position', 'bottom-center'); alertify.warning('No results found.'); }
-			});
 		}
 		else {
-			chrome.scripting.executeScript({
-				target: { tabId: tabId },
-				func: () => { alertify.set('notifier', 'position', 'bottom-center'); alertify.error('Search failed, please try again...'); }
-			});
 		}
 	}).catch(err => {
 		console.log(err);
 	})
-}
+} */
+
+/* async function rcSearchNWGUIDEHandler(info, tab) {
+	let sourcedbUri = "https://api.catrinagames.com/NW/searchguide/";
+
+	fetch(sourcedbUri + info.selectionText).then(res => {
+		//console.log(res);
+		if (res.status == 200) {
+			res.json().then(data => {
+				doSearch(data, tab);
+			})
+		}
+		else if (res.status == 404) {
+		}
+		else {
+		}
+	}).catch(err => {
+		console.log(err);
+	})
+} */
 
 async function resetContextMenus() {
 	chrome.runtime.onConnect.addListener(port => {
@@ -141,9 +171,7 @@ async function resetContextMenus() {
 		}
 	});
 
-	chrome.tabs.onUpdated.addListener((tabid, changeInfo, tab) => {
-		findTab();
-	});
+	findTab();
 
 	contextMenuInit();
 }
@@ -152,41 +180,66 @@ function contextMenuInit(){
 	chrome.contextMenus.removeAll(
 		function () {
 			chrome.contextMenus.create({
-				id: "rcSearch",
-				title: "Search NWDB for '%s'",
+				id: "rcSearchMain",
+				title: "Search for '%s' in NWDB",
 				contexts: ["selection"]
 			});
+/* 			chrome.contextMenus.create({
+				id: "rcSearchNWINFO",
+				title: "NWDB.info",
+				contexts: ["selection"],
+				parentId: "rcSearchMain"
+			});
+			chrome.contextMenus.create({
+				id: "rcSearchNWGUIDE",
+				title: "New-World.guide",
+				contexts: ["selection"],
+				parentId: "rcSearchMain"
+			}); */
 		}
 	);
 
 	chrome.contextMenus.onClicked.addListener(function (info, tab) {
-		//console.log(info);
-		tabId = tab.id;
-
-		if (info.menuItemId == "rcSearch") {
-			selectionHandler(info, tab);
+		if (info.menuItemId == "rcSearchMain") {
+			rcSearchHandler(info, tab);
 		}
+		/* if (info.menuItemId == "rcSearchNWINFO") {
+			rcSearchNWINFOHandler(info, tab);
+		}
+		if (info.menuItemId == "rcSearchNWGUIDE") {
+			rcSearchNWGUIDEHandler(info, tab);
+		} */
+		
+	});
+
+	chrome.runtime.onMessage.addListener((msg, sender) => {
+		if (msg == "rcSearchPopClosed"){
+			if (sender.tab){
+				removeCSS(sender.tab.id, ["/alertify/alertify.min.css", "/alertify/default.min.css", "/popup/css/rcNWSearch.css"]);
+			}
+		}
+	})
+}
+
+function insertCSS(tabIndex, files) {
+	chrome.scripting.insertCSS({
+		target: { tabId: tabIndex },
+		files: files
 	});
 }
 
-function insertCSS(tabIndex, css) {
+function removeCSS(tabIndex, files) {
 	chrome.scripting.removeCSS({
 		target: { tabId: tabIndex },
-		css: css
-	});
-	
-	chrome.scripting.insertCSS({
-		target: { tabId: tabIndex },
-		css: css
+		files: files
 	});
 }
 
 resetContextMenus();
-findTab();
 
 
 // KEEP ALIVE
-const onUpdate = (tabId, info, tab) => /^https?:/.test(info.url) && findTab([tab]);
+const onUpdate = (info, tab) => /^https?:/.test(info.url) && findTab([tab]);
 async function findTab(tabs) {
 	if (chrome.runtime.lastError) { /* tab was closed before setTimeout ran */ }
 	for (const { id: tabId } of tabs || await chrome.tabs.query({ url: '*://*/*' })) {

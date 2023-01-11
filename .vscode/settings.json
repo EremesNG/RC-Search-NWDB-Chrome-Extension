@@ -1,0 +1,15 @@
+{
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            {
+                "scope": [
+                    "comment.block.js",
+                    "comment.line.double-slash.js",
+                ],
+                "settings": {
+                    "fontStyle": "",
+                }
+            },
+        ]
+    }
+}
