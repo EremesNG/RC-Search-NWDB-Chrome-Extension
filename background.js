@@ -96,7 +96,7 @@ async function rcSearchHandler(info, tab) {
 	let sourcedbUri = "https://api.catrinagames.com/NW/searchdb/"
 	insertCSS(tab.id, ["/alertify/alertify.min.css", "/alertify/default.min.css", "/popup/css/rcNWSearch.css"]);
 
-	fetch(sourcedbUri + info.selectionText).then(res => {
+	fetch(sourcedbUri + encodeURIComponent(info.selectionText)).then(res => {
 		//console.log(res);
 		if (res.status == 200) {
 			res.json().then(data => {
