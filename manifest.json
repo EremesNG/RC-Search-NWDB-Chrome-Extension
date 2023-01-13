@@ -17,5 +17,5 @@
   },
   "permissions": ["contextMenus", "tabs", "scripting", "alarms", "storage", "nativeMessaging"],
   "host_permissions": ["http://*/*", "https://*/*"],
-  "version": "1.31"
+  "version": "1.32"
 }
