@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Right-Click Search New World DB",
-  "description": "Quickly search for item info on nwdb.info via right-click",
+  "description": "Quickly search for item info on nwdb via right-click",
   "background": {
     "service_worker": "background.js"
   },
@@ -17,5 +17,5 @@
   },
   "permissions": ["contextMenus", "tabs", "scripting", "alarms", "storage", "nativeMessaging"],
   "host_permissions": ["http://*/*", "https://*/*"],
-  "version": "1.32"
+  "version": "1.33"
 }

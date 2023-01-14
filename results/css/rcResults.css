@@ -11,6 +11,9 @@ html, body{
 
 .rcsearchItemLi {
     border-bottom: 1px solid #4a443a;
+    background-image: url(https://cdn.nwdb.info/static/images/tooltip_header_bg_0.jpg);
+    background-size: cover;
+    padding: 10px;
 }
 
 .rcsearchItemLi:hover .rcsearchItemImg::before {
@@ -56,6 +59,14 @@ html, body{
     font-size: .75rem !important;
     line-height: 1rem !important;
     text-transform: capitalize !important;
+}
+
+.rcsearchItemBtn {
+    background-color: #202020 !important;
+}
+
+.rcsearchItemBtn:hover {
+    background-color: #ffc107 !important;
 }
 
 .rcsearchItemSources{

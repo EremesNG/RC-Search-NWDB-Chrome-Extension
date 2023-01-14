@@ -18,7 +18,7 @@ chrome.storage.local.get("itemsData").then((res) => {
 
     for (const item of res.itemsData) {
         let itemLi = document.createElement('li');
-        itemLi.className = "row media d-flex rcsearchItemLi";
+        itemLi.className = "row media d-flex align-items-center rcsearchItemLi";
 
         let aTagsDiv = document.createElement('div');
         aTagsDiv.className = "rcsearchItemSources col-12 col-md-3";
@@ -27,7 +27,7 @@ chrome.storage.local.get("itemsData").then((res) => {
             let aTag = document.createElement('a');
             aTag.href = uri.url;
             aTag.target = "_blank";
-            aTag.className = "btn btn-outline-warning col-6 col-md-12";
+            aTag.className = "btn btn-outline-warning col-6 col-md-12 rcsearchItemBtn";
             aTag.textContent = uri.name;
 
             let aTagIcon = document.createElement('i');
@@ -38,7 +38,7 @@ chrome.storage.local.get("itemsData").then((res) => {
         }
 
         let itemImgDiv = document.createElement('div');
-        itemImgDiv.className = "align-self-start rcsearchItemImg col-2 col-md-1";
+        itemImgDiv.className = "rcsearchItemImg col-2 col-md-1";
         itemImgDiv.innerHTML = `<img src="${item.icon ? item.icon : "https://nwdb.info/images/db/soon.png"}" width="64" height="64" alt="${item.name}">`;
 
         itemLi.appendChild(itemImgDiv);
